@@ -9,7 +9,12 @@ import {
 } from '@nestjs/common';
 import { ExceptionService } from './exception.service';
 import { CreateExceptionDto } from './dto/create-exception.dto';
-import { ResponseReturn } from 'src/utils/response.return';
+import {
+  PromiseResponseReturn,
+  ResponseReturn,
+} from 'src/utils/response.return';
+import { Exception } from './entities/exception.entity';
+import { Pagination } from 'src/utils/page';
 
 @Controller('exception')
 export class ExceptionController {
@@ -32,16 +37,16 @@ export class ExceptionController {
   }
 
   @Get()
-  async findAll() {
-    const body = new ResponseReturn();
+  async findAll(): PromiseResponseReturn<Pagination<Exception>> {
+    const body = new ResponseReturn<Pagination<Exception>>();
     let exceptions, total;
     try {
       [exceptions, total] = await this.exceptionService.findAll();
     } catch (err) {
-      return body.fail(err.message);
+      return body.f(err.message);
     }
 
-    return body.success('查询成功').data({
+    return body.s('查询成功').d({
       list: exceptions,
       total,
     });
@@ -54,9 +59,9 @@ export class ExceptionController {
     try {
       exception = await this.exceptionService.findOne(+id);
     } catch (err) {
-      return body.fail(err.message);
+      return body.f(err.message);
     }
-    return body.success('查询成功').data(exception);
+    return body.s('查询成功').d(exception);
   }
 
   @Delete(':id')
@@ -65,8 +70,8 @@ export class ExceptionController {
     try {
       await this.exceptionService.remove(+id);
     } catch (err) {
-      return body.fail(err.message);
+      return body.f(err.message);
     }
-    return body.success('删除成功');
+    return body.s('删除成功');
   }
 }

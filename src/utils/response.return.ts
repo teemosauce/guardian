@@ -1,17 +1,33 @@
-export class ResponseReturn {
-  #msg?: string;
-  #code?: number;
-  #success = true;
-  #data?: any = null;
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ResponseReturn<T> {
+  @ApiProperty({
+    description: '消息说明',
+  })
+  msg?: string;
+
+  @ApiProperty({
+    description: '状态码',
+  })
+  code?: number;
+
+  @ApiProperty({
+    description: '状态',
+    type: 'boolean',
+  })
+  success = true;
+
+  data?: T;
 
   /**
    * 失败返回
    * @param msg 失败的信息
    * @returns
    */
-  fail(msg?: string): ResponseReturn {
-    this.#success = false;
-    this.#msg = msg;
+
+  f(msg?: string): ResponseReturn<T> {
+    this.success = false;
+    this.msg = msg;
     return this;
   }
   /**
@@ -19,9 +35,10 @@ export class ResponseReturn {
    * @param msg 成功的信息
    * @returns
    */
-  success(msg?: string): ResponseReturn {
-    this.#success = true;
-    this.#msg = msg;
+
+  s(msg?: string): ResponseReturn<T> {
+    this.success = true;
+    this.msg = msg;
     return this;
   }
 
@@ -30,8 +47,8 @@ export class ResponseReturn {
    * @param data 返回的数据
    * @returns
    */
-  data(data: any): ResponseReturn {
-    this.#data = data;
+  d(data: any): ResponseReturn<T> {
+    this.data = data;
     return this;
   }
   /**
@@ -39,17 +56,19 @@ export class ResponseReturn {
    * @param code
    * @returns
    */
-  code(code: number): ResponseReturn {
-    this.#code = code;
+  c(code: number): ResponseReturn<T> {
+    this.code = code;
     return this;
   }
 
   toJSON() {
     return {
-      code: this.#code,
-      msg: this.#msg,
-      data: this.#data,
-      success: this.#success,
+      code: this.code,
+      msg: this.msg,
+      data: this.data,
+      success: this.success,
     };
   }
 }
+
+export type PromiseResponseReturn<T> = Promise<ResponseReturn<T>>;

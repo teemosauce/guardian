@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-@Injectable()
+@Injectable({
+  scope: Scope.DEFAULT, // 默认从容器中获取的service实例只有一个，在整个app的生命周期里面共享
+})
 export class ProjectService {
+  lastTime: number;
   constructor(
     @InjectRepository(Project) private readonly project: Repository<Project>,
   ) {}
@@ -19,7 +22,7 @@ export class ProjectService {
   create(createProjectDto: CreateProjectDto) {
     const project = new Project();
     project.name = createProjectDto.name;
-    project.type = createProjectDto.type;
+    project.type = +createProjectDto.type;
     project.desc = createProjectDto.desc;
     return this.project.insert(project);
   }

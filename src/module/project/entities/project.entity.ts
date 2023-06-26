@@ -7,7 +7,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 
-type ProjectType = '小程序' | 'H5' | 'REACT' | 'VUE';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  *项目表
@@ -20,6 +20,9 @@ export class Project {
     name: 'id',
     comment: 'ID',
   })
+  @ApiProperty({
+    description: '项目的ID',
+  })
   id: string;
 
   @Column({
@@ -29,6 +32,9 @@ export class Project {
     comment: '项目名称',
     nullable: false,
   })
+  @ApiProperty({
+    description: '项目的名称',
+  })
   name: string;
 
   @Column({
@@ -36,6 +42,9 @@ export class Project {
     length: 150,
     name: 'desc',
     comment: '项目描述',
+  })
+  @ApiProperty({
+    description: '项目描述',
   })
   desc: string;
 
@@ -46,7 +55,10 @@ export class Project {
     unsigned: true,
     nullable: false,
   })
-  type: ProjectType;
+  @ApiProperty({
+    description: '项目的所属类型 1(小程序) 2(H5) 3(Vue) 4(React)',
+  })
+  type: number;
 
   @DeleteDateColumn({
     name: 'deleted_at',
@@ -62,12 +74,18 @@ export class Project {
     comment: '创建时间',
     update: false,
   })
+  @ApiProperty({
+    description: '项目的创建时间',
+  })
   createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',
     name: 'updated_at',
     comment: '最后更新时间',
+  })
+  @ApiProperty({
+    description: '项目的最后修改时间',
   })
   updatedAt: Date;
 }
