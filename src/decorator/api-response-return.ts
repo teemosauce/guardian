@@ -7,6 +7,29 @@ import {
 } from '@nestjs/swagger';
 import { Pagination } from '../utils/page';
 import { ResponseReturn } from '../utils/response.return';
+import {
+  ReferenceObject,
+  SchemaObject,
+} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+
+const ResponseFactory = (
+  options: ApiResponseOptions,
+  data: SchemaObject | ReferenceObject,
+) => {
+  return ApiResponse({
+    ...options,
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseReturn) },
+        {
+          properties: {
+            data,
+          },
+        },
+      ],
+    },
+  });
+};
 
 /**
  * 返回带分页的列表信息
@@ -19,32 +42,20 @@ export const ApiResponsePagination = <TModel extends Type<any>>(
 ) => {
   return applyDecorators(
     ApiExtraModels(mode), // 记得这里要把模型额外导入
-    ApiResponse({
-      ...options,
-      schema: {
-        allOf: [
-          { $ref: getSchemaPath(ResponseReturn) },
-          {
-            properties: {
-              data: {
-                allOf: [
-                  { $ref: getSchemaPath(Pagination) },
-                  {
-                    properties: {
-                      list: {
-                        type: 'array',
-                        items: {
-                          $ref: getSchemaPath(mode),
-                        },
-                      },
-                    },
-                  },
-                ],
+    ResponseFactory(options, {
+      allOf: [
+        { $ref: getSchemaPath(Pagination) },
+        {
+          properties: {
+            list: {
+              type: 'array',
+              items: {
+                $ref: getSchemaPath(mode),
               },
             },
           },
-        ],
-      },
+        },
+      ],
     }),
   );
 };
@@ -60,22 +71,10 @@ export const ApiResponseList = <TModel extends Type<any>>(
 ) => {
   return applyDecorators(
     ApiExtraModels(mode),
-    ApiResponse({
-      ...options,
-      schema: {
-        allOf: [
-          { $ref: getSchemaPath(ResponseReturn) },
-          {
-            properties: {
-              data: {
-                type: 'array',
-                items: {
-                  $ref: getSchemaPath(mode),
-                },
-              },
-            },
-          },
-        ],
+    ResponseFactory(options, {
+      type: 'array',
+      items: {
+        $ref: getSchemaPath(mode),
       },
     }),
   );
@@ -92,19 +91,7 @@ export const ApiResponseObject = <TModel extends Type<any>>(
 ) => {
   return applyDecorators(
     ApiExtraModels(mode),
-    ApiResponse({
-      ...options,
-      schema: {
-        allOf: [
-          { $ref: getSchemaPath(ResponseReturn) },
-          {
-            properties: {
-              data: { $ref: getSchemaPath(mode) },
-            },
-          },
-        ],
-      },
-    }),
+    ResponseFactory(options, { $ref: getSchemaPath(mode) }),
   );
 };
 
@@ -118,21 +105,9 @@ const ApiResponseAny = <TModel extends number | string | boolean | null>(
   options?: ApiResponseOptions,
 ) => {
   return applyDecorators(
-    ApiResponse({
-      ...options,
-      schema: {
-        allOf: [
-          { $ref: getSchemaPath(ResponseReturn) },
-          {
-            properties: {
-              data: {
-                type: typeof mode,
-                default: mode,
-              },
-            },
-          },
-        ],
-      },
+    ResponseFactory(options, {
+      type: typeof mode,
+      default: mode,
     }),
   );
 };
